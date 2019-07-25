@@ -31,6 +31,7 @@ public class HazelcastSlidingWindowSyncRequestRateLimiterTest extends AbstractSy
 
     @AfterEach
     void afterEach() {
+
         hz.getDistributedObjects().forEach(DistributedObject::destroy);
     }
 
