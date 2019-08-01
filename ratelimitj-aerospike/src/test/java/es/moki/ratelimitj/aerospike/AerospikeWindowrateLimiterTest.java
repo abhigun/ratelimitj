@@ -26,7 +26,7 @@ public class AerospikeWindowrateLimiterTest extends AbstractSyncRequestRateLimit
 
     @AfterEach
     void AfterEach(){
-        aerospikeClient.truncate(null,aerospikeConfig.getNamespace(),aerospikeConfig.getSessionSet(),null);
+//        aerospikeClient.truncate(null,aerospikeConfig.getNamespace(),aerospikeConfig.getSessionSet(),null);
     }
 
     @AfterAll

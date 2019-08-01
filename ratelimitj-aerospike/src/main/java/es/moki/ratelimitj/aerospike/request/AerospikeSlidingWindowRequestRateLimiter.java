@@ -72,23 +72,12 @@ public class AerospikeSlidingWindowRequestRateLimiter implements RequestRateLimi
         return false;
 
     }
-    private Record changeExpiry(Key k, int longestDuration){
-        Record record = aerospikeClient.get(clientPolicy.readPolicyDefault,k);
-        WritePolicy writePolicy = new WritePolicy(clientPolicy.writePolicyDefault);
-        writePolicy.expiration = longestDuration;
-        List<Bin> bins = new ArrayList<>();
-        Bin dbin = new Bin("default",1);
-        if(record != null){
-            Map<String,Object> m = record.bins;
-            for( String binname: m.keySet()){
-                Long val = (Long) m.get(binname);
-                Bin bin = new Bin(binname,val);
-                bins.add(bin);
-            }
+    private void changeExpiry(Key k, int longestDuration){
+        if(aerospikeClient.exists(clientPolicy.readPolicyDefault,k)){
+            WritePolicy writePolicy = new WritePolicy(clientPolicy.writePolicyDefault);
+            writePolicy.expiration = longestDuration;
+            aerospikeClient.touch(writePolicy,k);
         }
-        bins.add(dbin);
-        aerospikeClient.put(writePolicy,k,bins.toArray(new Bin[bins.size()]));
-        return record;
     }
     private Record getRecord(Key k){
         return aerospikeClient.get(clientPolicy.readPolicyDefault,k);
@@ -104,8 +93,7 @@ public class AerospikeSlidingWindowRequestRateLimiter implements RequestRateLimi
         final int longestDuration = rules.stream().map(RequestLimitRule::getDurationSeconds).reduce(Integer::max).orElse(0);
         List<SavedKey> savedKeys = new ArrayList<>(rules.size());
         Key k = new Key(aerospikeConfig.getNamespace(),aerospikeConfig.getSessionSet(),key);
-        Record record = changeExpiry(k,longestDuration);
-//        Record record = getRecord(k);
+        Record record = getRecord(k);
         boolean geLimit = false;
 
         for(RequestLimitRule rule: rules){
@@ -142,7 +130,7 @@ public class AerospikeSlidingWindowRequestRateLimiter implements RequestRateLimi
                 for(String binname : dele) {
                     deleteBin(k,binname);
                 }
-                final long decrement = decr;
+//                final long decrement = decr;
                 Bin countbin = new Bin(savedKey.countKey,-decr);
                 cur = aerospikeClient.operate(clientPolicy.writePolicyDefault,k, Operation.add(countbin),Operation.get(savedKey.countKey)).getLong(savedKey.countKey);
 //                aerospikeClient.add(clientPolicy.writePolicyDefault,k,countbin);
@@ -167,10 +155,9 @@ public class AerospikeSlidingWindowRequestRateLimiter implements RequestRateLimi
             Bin countbin = new Bin(savedKey.countKey,weight);
             Bin bucketbin = new Bin(savedKey.countKey+savedKey.blockId,weight);
             aerospikeClient.operate(clientPolicy.writePolicyDefault,k,Operation.put(tsbin),Operation.add(countbin),Operation.add(bucketbin));
-            // TODO should this ben just compute
 
         }
-
+        changeExpiry(k,longestDuration);
         return geLimit;
 
     }

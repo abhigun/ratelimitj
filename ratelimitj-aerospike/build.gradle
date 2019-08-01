@@ -5,8 +5,7 @@ dependencies {
     api(
             project(':ratelimitj-core'),
             'com.aerospike:aerospike-client:4.1.11',
-            'org.projectlombok:lombok:1.18.8',
-             'org.projectlombok:lombok:1.18.8'
+            'org.projectlombok:lombok:1.18.8'
     )
 
     implementation(
