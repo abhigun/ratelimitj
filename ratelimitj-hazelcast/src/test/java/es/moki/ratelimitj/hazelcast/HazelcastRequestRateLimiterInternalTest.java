@@ -40,6 +40,7 @@ class HazelcastRequestRateLimiterInternalTest {
 
     @AfterEach
     void afterEach() {
+
         hz.getDistributedObjects().forEach(DistributedObject::destroy);
     }
 
