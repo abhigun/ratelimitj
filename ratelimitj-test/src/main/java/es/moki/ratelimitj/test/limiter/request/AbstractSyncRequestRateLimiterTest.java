@@ -25,23 +25,6 @@ public abstract class AbstractSyncRequestRateLimiterTest {
     protected abstract RequestRateLimiter getRateLimiter(Set<RequestLimitRule> rules, TimeSupplier timeSupplier);
 
     @Test
-    void customTest(){
-        RequestLimitRule rule1 = RequestLimitRule.of(Duration.ofSeconds(1800),100).withPrecision(Duration.ofSeconds(60));
-        RequestLimitRule rule2 = RequestLimitRule.of(Duration.ofSeconds(300),10).withPrecision(Duration.ofSeconds(60));
-        RequestRateLimiter requestRateLimiter = getRateLimiter(ImmutableSet.of(rule1, rule2), timeBandit);
-        IntStream.rangeClosed(1,5).forEach(value -> {
-            timeBandit.addUnixTimeMilliSeconds(60*1000L);
-            assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.1.1",2)).isFalse();
-        });
-        timeBandit.addUnixTimeMilliSeconds(30*1000L);
-        assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.1.1")).isFalse();
-        timeBandit.addUnixTimeMilliSeconds(40*1000L);
-        assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.1.1")).isFalse();
-        assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.1.1",2)).isTrue();
-
-    }
-
-    @Test @Disabled
     void shouldLimitSingleWindowSync()  {
 
         ImmutableSet<RequestLimitRule> rules = ImmutableSet.of(RequestLimitRule.of(Duration.ofSeconds(10), 5));
@@ -103,7 +86,7 @@ public abstract class AbstractSyncRequestRateLimiterTest {
                 keySuffix -> assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.0." + keySuffix)).isFalse());
     }
 
-    @Test  @Disabled
+    @Test @Disabled
     void shouldLimitSingleWindowSyncWithKeySpecificRules() {
 
         RequestLimitRule rule1 = RequestLimitRule.of(Duration.ofSeconds(10), 5).matchingKeys("ip:127.9.0.0");

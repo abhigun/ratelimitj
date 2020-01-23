@@ -72,6 +72,11 @@ public class AerospikeSlidingWindowRequestRateLimiter implements RequestRateLimi
         return false;
 
     }
+
+    /**
+     * @param k current Key value of the window
+     * @param longestDuration expiry time in seconds
+     */
     private void changeExpiry(Key k, int longestDuration){
         if(aerospikeClient.exists(clientPolicy.readPolicyDefault,k)){
             WritePolicy writePolicy = new WritePolicy(clientPolicy.writePolicyDefault);
@@ -79,27 +84,33 @@ public class AerospikeSlidingWindowRequestRateLimiter implements RequestRateLimi
             aerospikeClient.touch(writePolicy,k);
         }
     }
+
     private Record getRecord(Key k){
         return aerospikeClient.get(clientPolicy.readPolicyDefault,k);
     }
-    private void deleteBin(Key k,String binname){
-        Bin bin = Bin.asNull(binname);
+
+    private void deleteBin(Key k,String binName){
+        Bin bin = Bin.asNull(binName);
         aerospikeClient.put(clientPolicy.writePolicyDefault,k,bin);
     }
+
     private boolean eqOrGeLimit(String key, int weight,boolean strictlyGreater) {
         final long now = timeSupplier.get();
         final Set<RequestLimitRule> rules = rulesSupplier.getRules(key);
-        // TODO implement cleanup
+
         final int longestDuration = rules.stream().map(RequestLimitRule::getDurationSeconds).reduce(Integer::max).orElse(0);
+
         List<SavedKey> savedKeys = new ArrayList<>(rules.size());
         Key k = new Key(aerospikeConfig.getNamespace(),aerospikeConfig.getSessionSet(),key);
         Record record = getRecord(k);
+
         boolean geLimit = false;
 
         for(RequestLimitRule rule: rules){
             SavedKey savedKey = new SavedKey(now, rule.getDurationSeconds(), rule.getPrecisionSeconds());
             savedKeys.add(savedKey);
             Long oldTs = null;
+
             if(record != null)
                 oldTs = record.getLong(savedKey.tsKey);
 
@@ -125,6 +136,7 @@ public class AerospikeSlidingWindowRequestRateLimiter implements RequestRateLimi
                     dele.add(bkey);
                 }
             }
+
             Long cur = null;
             if (!dele.isEmpty()) {
                 for(String binname : dele) {
@@ -132,8 +144,10 @@ public class AerospikeSlidingWindowRequestRateLimiter implements RequestRateLimi
                 }
 //                final long decrement = decr;
                 Bin countbin = new Bin(savedKey.countKey,-decr);
+
+//          Instead of making multiple DB calls makes all the operations in a single connection
                 cur = aerospikeClient.operate(clientPolicy.writePolicyDefault,k, Operation.add(countbin),Operation.get(savedKey.countKey)).getLong(savedKey.countKey);
-//                aerospikeClient.add(clientPolicy.writePolicyDefault,k,countbin);
+
             } else {
                 if(record != null)
                     cur = record.getLong(savedKey.countKey);
@@ -157,6 +171,7 @@ public class AerospikeSlidingWindowRequestRateLimiter implements RequestRateLimi
             aerospikeClient.operate(clientPolicy.writePolicyDefault,k,Operation.put(tsbin),Operation.add(countbin),Operation.add(bucketbin));
 
         }
+        // Extend the expiry of the key
         changeExpiry(k,longestDuration);
         return geLimit;
 

@@ -1,11 +1,11 @@
 description 'Rate Limiter Aerospike'
 
 dependencies {
-
+    compileOnly 'org.projectlombok:lombok:1.18.10'
+    annotationProcessor 'org.projectlombok:lombok:1.18.10'
     api(
             project(':ratelimitj-core'),
             'com.aerospike:aerospike-client:4.1.11',
-            'org.projectlombok:lombok:1.18.8'
     )
 
     implementation(

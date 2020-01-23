@@ -38,14 +38,5 @@ public class AerospikeConfig {
     
     private String sessionSet;
     
-    private String instrumentVerificationSet;
-    
-    private String rateLimiterSet;
-
-    
     private int tokenExpiry;
-
-
-
-
 }

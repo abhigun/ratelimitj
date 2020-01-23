@@ -17,10 +17,10 @@ import java.util.concurrent.Executors;
 public class AerospikeTestFactory {
 
     private final AerospikeConfig aerospikeConfig;
-    private  AerospikeClient aerospikeClient;
+    private final AerospikeClient aerospikeClient;
 
     public AerospikeTestFactory() {
-        this.aerospikeConfig = new AerospikeConfig("127.0.0.1",5,"gandalf_rw","gandalfrolling","phonepeaerospike",100,0,5,"test","ratelimiter","gandalf_instrument_verification","gandalf_rate_limitor",60);
+        this.aerospikeConfig = new AerospikeConfig("127.0.0.1",5,null,null,null,100,0,5,"test","ratelimiter",60);
         this.aerospikeClient = getStandAloneConnection(this.aerospikeConfig);
     }
 

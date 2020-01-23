@@ -20,7 +20,6 @@ public interface RequestLimitRulesSupplier<T> {
                 .filter( rule -> rule.getKeys() == null )
                 .collect(Collectors.toSet());
     }
-
     /**
      * Build the rule map.
      * @param rules

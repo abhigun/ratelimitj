@@ -1,8 +1,11 @@
 package es.moki.ratelimitj.aerospike;
 
 import com.aerospike.client.AerospikeClient;
+import com.google.common.collect.ImmutableSet;
 import es.moki.ratelimitj.aerospike.request.AerospikeConfig;
 import es.moki.ratelimitj.aerospike.request.AerospikeSlidingWindowRequestRateLimiter;
+import es.moki.ratelimitj.aerospike.request.AerospikeTimeSupplier;
+import es.moki.ratelimitj.aerospike.time.ASTimeBanditSupplier;
 import es.moki.ratelimitj.core.limiter.request.RequestLimitRule;
 import es.moki.ratelimitj.core.limiter.request.RequestRateLimiter;
 import es.moki.ratelimitj.core.time.TimeSupplier;
@@ -10,34 +13,54 @@ import es.moki.ratelimitj.test.limiter.request.AbstractSyncRequestRateLimiterTes
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import java.util.Set;
+import org.junit.jupiter.api.Test;
 
-public class AerospikeWindowrateLimiterTest extends AbstractSyncRequestRateLimiterTest {
+import java.time.Duration;
+import java.util.Set;
+import java.util.stream.IntStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SuppressWarnings("PMD.AvoidUsingHardCodedIP")
+public class AerospikeWindowrateLimiterTest {
 
     private static AerospikeClient aerospikeClient;
     private static AerospikeConfig aerospikeConfig;
+    private static ASTimeBanditSupplier asTimeBanditSupplier;
 
     @BeforeAll
     static void BeforeAll(){
         AerospikeTestFactory aerospikeTestFactory = new AerospikeTestFactory();
         aerospikeClient = aerospikeTestFactory.getClient();
         aerospikeConfig = aerospikeTestFactory.getConfig();
+        asTimeBanditSupplier = new ASTimeBanditSupplier();
     }
 
     @AfterEach
     void AfterEach(){
-//        aerospikeClient.truncate(null,aerospikeConfig.getNamespace(),aerospikeConfig.getSessionSet(),null);
+        aerospikeClient.truncate(null,aerospikeConfig.getNamespace(),aerospikeConfig.getSessionSet(),null);
     }
 
     @AfterAll
     static void AfterAll(){
-
         aerospikeClient.close();
     }
 
+    @Test
+    void shouldLimitSingleWindowSync()  {
 
-    @Override
-    protected RequestRateLimiter getRateLimiter(Set<RequestLimitRule> rules, TimeSupplier timeSupplier) {
-        return new AerospikeSlidingWindowRequestRateLimiter(aerospikeClient,rules,timeSupplier, aerospikeConfig);
+        ImmutableSet<RequestLimitRule> rules = ImmutableSet.of(RequestLimitRule.of(Duration.ofSeconds(10), 5));
+        RequestRateLimiter requestRateLimiter = getRateLimiter(rules);
+
+        IntStream.rangeClosed(1, 5).forEach(value -> {
+            asTimeBanditSupplier.addUnixSeconds(1);
+            assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.1.1")).isFalse();
+        });
+
+        assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.1.1")).isTrue();
+    }
+
+    private RequestRateLimiter getRateLimiter(Set<RequestLimitRule> rules) {
+        return new AerospikeSlidingWindowRequestRateLimiter(aerospikeClient,rules,asTimeBanditSupplier, aerospikeConfig);
     }
 }
