@@ -38,7 +38,7 @@ public abstract class AbstractSyncRequestRateLimiterTest {
         assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.1.1")).isTrue();
     }
 
-    @Test @Disabled
+    @Test
     void shouldGeLimitSingleWindowSync() {
 
         ImmutableSet<RequestLimitRule> rules = ImmutableSet.of(RequestLimitRule.of(Duration.ofSeconds(10), 5));
@@ -52,7 +52,7 @@ public abstract class AbstractSyncRequestRateLimiterTest {
         assertThat(requestRateLimiter.geLimitWhenIncremented("ip:127.0.1.2")).isTrue();
     }
 
-    @Test @Disabled
+    @Test
     void shouldLimitWithWeightSingleWindowSync() {
 
         ImmutableSet<RequestLimitRule> rules = ImmutableSet.of(RequestLimitRule.of(Duration.ofSeconds(10), 10));
@@ -66,7 +66,7 @@ public abstract class AbstractSyncRequestRateLimiterTest {
         assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.1.2", 2)).isTrue();
     }
 
-    @Test @Disabled
+    @Test
     void shouldLimitSingleWindowSyncWithMultipleKeys() {
 
         ImmutableSet<RequestLimitRule> rules = ImmutableSet.of(RequestLimitRule.of(Duration.ofSeconds(10), 5));
@@ -86,7 +86,7 @@ public abstract class AbstractSyncRequestRateLimiterTest {
                 keySuffix -> assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.0." + keySuffix)).isFalse());
     }
 
-    @Test @Disabled
+    @Test
     void shouldLimitSingleWindowSyncWithKeySpecificRules() {
 
         RequestLimitRule rule1 = RequestLimitRule.of(Duration.ofSeconds(10), 5).matchingKeys("ip:127.9.0.0");
@@ -104,7 +104,7 @@ public abstract class AbstractSyncRequestRateLimiterTest {
         assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.9.1.0")).isTrue();
     }
 
-    @Test @Disabled
+    @Test
     void shouldResetLimit() {
         ImmutableSet<RequestLimitRule> rules = ImmutableSet.of(RequestLimitRule.of(Duration.ofSeconds(60), 1));
         RequestRateLimiter requestRateLimiter = getRateLimiter(rules, timeBandit);
@@ -120,7 +120,7 @@ public abstract class AbstractSyncRequestRateLimiterTest {
     }
 
 
-    @Test @Disabled
+    @Test
     void shouldRateLimitOverTime() {
         RequestLimitRule rule1 = RequestLimitRule.of(Duration.ofSeconds(5), 250).withPrecision(Duration.ofSeconds(1)).matchingKeys("ip:127.3.9.3");
         RequestRateLimiter requestRateLimiter = getRateLimiter(ImmutableSet.of(rule1), timeBandit);

@@ -14,10 +14,10 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ASTimeBanditSupplier implements TimeSupplier {
 
-    private final AtomicLong time = new AtomicLong(100000L);
+    private final AtomicLong time = new AtomicLong(1000000L);
 
     public long addUnixSeconds(long seconds){
-        return time.addAndGet(seconds);
+        return time.addAndGet(seconds*1000);
     }
 
     @Override
@@ -33,6 +33,10 @@ public class ASTimeBanditSupplier implements TimeSupplier {
 
     @Override
     public long get() {
-        return time.get();
+        return time.get()/1000L;
+    }
+
+    public long addUnixTimeMilliSeconds(long milliseconds) {
+        return time.getAndAdd(milliseconds);
     }
 }
