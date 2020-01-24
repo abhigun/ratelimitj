@@ -7,10 +7,11 @@ import com.aerospike.client.policy.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * @author gunda.abhishek
  * @created 24/01/2020
- * @project ratelimitj
  */
 
 
@@ -61,10 +62,12 @@ public class AerospikeConnection {
     }
 
     public AerospikeClient getAerospikeClient() {
+        requireNonNull(aerospikeClient, "Aerospike Client can not be null, Call Initiialize() to set the connection");
         return aerospikeClient;
     }
 
     public ClientPolicy getClientPolicy() {
+        requireNonNull(clientPolicy, "ClientPolicy can not be null,Call Initiialize() to set the connection");
         return clientPolicy;
     }
 }

@@ -18,7 +18,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
-public class AerospikeWindowrateLimiterTest {
+public class AerospikeWindowRateLimiterTest {
 
     private static AerospikeClient aerospikeClient;
     private static AerospikeConfig aerospikeConfig;

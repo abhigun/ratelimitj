@@ -26,6 +26,7 @@ public class AerospikeSlidingWindowRequestRateLimiter implements RequestRateLimi
     private final AerospikeClient aerospikeClient;
     private final ClientPolicy clientPolicy;
     private final AerospikeConfig aerospikeConfig;
+
     public AerospikeSlidingWindowRequestRateLimiter(AerospikeClient aerospikeClient, Set<RequestLimitRule> rules, TimeSupplier timeSupplier, AerospikeConfig aerospikeConfig){
         requireNonNull(aerospikeClient, "Aerospike Client can not be null");
         requireNonNull(aerospikeConfig, "Aerospike Config can not be null");

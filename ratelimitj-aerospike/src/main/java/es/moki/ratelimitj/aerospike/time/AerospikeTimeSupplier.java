@@ -3,12 +3,12 @@ package es.moki.ratelimitj.aerospike.time;
 import es.moki.ratelimitj.core.time.TimeSupplier;
 import reactor.core.publisher.Mono;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
  * @author gunda.abhishek
  * @created 23/01/2020
- * @project ratelimitj
  */
 
 /**
@@ -20,12 +20,12 @@ public class AerospikeTimeSupplier implements TimeSupplier {
 
     @Override
     public CompletionStage<Long> getAsync() {
-        return null;
+        return CompletableFuture.completedFuture(get());
     }
 
     @Override
     public Mono<Long> getReactive() {
-        return null;
+        return Mono.just(get());
     }
 
     /**

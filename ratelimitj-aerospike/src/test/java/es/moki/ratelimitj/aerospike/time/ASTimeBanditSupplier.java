@@ -14,9 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ASTimeBanditSupplier implements TimeSupplier {
 
-    private AerospikeTimeSupplier aerospikeTimeSupplier = new AerospikeTimeSupplier();
-
-    private final AtomicLong time = new AtomicLong(aerospikeTimeSupplier.get());
+    private final AtomicLong time = new AtomicLong(100000L);
 
     public long addUnixSeconds(long seconds){
         return time.addAndGet(seconds);
