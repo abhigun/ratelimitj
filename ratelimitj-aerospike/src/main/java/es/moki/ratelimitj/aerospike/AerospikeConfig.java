@@ -1,4 +1,4 @@
-package es.moki.ratelimitj.aerospike.request;
+package es.moki.ratelimitj.aerospike;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -39,4 +39,6 @@ public class AerospikeConfig {
     private String sessionSet;
     
     private int tokenExpiry;
+
+    private boolean isTLSEnabled;
 }

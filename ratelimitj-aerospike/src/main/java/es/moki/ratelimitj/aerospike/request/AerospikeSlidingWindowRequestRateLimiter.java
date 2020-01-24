@@ -2,6 +2,7 @@ package es.moki.ratelimitj.aerospike.request;
 import com.aerospike.client.*;
 import com.aerospike.client.policy.ClientPolicy;
 import com.aerospike.client.policy.WritePolicy;
+import es.moki.ratelimitj.aerospike.AerospikeConfig;
 import es.moki.ratelimitj.core.limiter.request.DefaultRequestLimitRulesSupplier;
 import es.moki.ratelimitj.core.limiter.request.RequestLimitRule;
 import es.moki.ratelimitj.core.limiter.request.RequestRateLimiter;
