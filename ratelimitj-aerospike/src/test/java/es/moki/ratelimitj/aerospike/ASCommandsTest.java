@@ -4,6 +4,8 @@ import com.aerospike.client.AerospikeException;
 import com.aerospike.client.Bin;
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
+import es.moki.ratelimitj.aerospike.time.AerospikeTimeSupplier;
+import es.moki.ratelimitj.inmemory.request.SavedKey;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -25,6 +27,7 @@ public class ASCommandsTest {
     private static AerospikeCommands aerospikeCommands;
     private static AerospikeConnection aerospikeConnection;
     private static AerospikeConfig aerospikeConfig;
+    private static AerospikeTimeSupplier aerospikeTimeSupplier;
 
     private static final String KEY = "key";
     private static final String STRING_BIN = "string";
@@ -37,6 +40,7 @@ public class ASCommandsTest {
         aerospikeConfig = new AerospikeConfig("127.0.0.1",5,null,null,null,100,0,5,"test","ratelimiter",60,false);
         aerospikeConnection = new AerospikeConnection(aerospikeConfig);
         aerospikeCommands = new AerospikeCommands(aerospikeConnection);
+        aerospikeTimeSupplier = new AerospikeTimeSupplier();
     }
 
     @AfterAll
@@ -116,12 +120,20 @@ public class ASCommandsTest {
         aerospikeCommands.updateAndGet(INTEGER_BIN,k, -6);
         assertThat(aerospikeCommands.getRecord(k).getInt(INTEGER_BIN)).isNotNull().isEqualTo(0);
 
+        // Shouldn't be using bins with string values under Operation.add()
         assertThrows(AerospikeException.class, ()->aerospikeCommands.updateAndGet(STRING_BIN,k,10));
     }
 
     @Test
     void updateCounts(){
+        Key k = aerospikeCommands.key(KEY);
+        List<SavedKey> savedKeys = new ArrayList<>();
+        savedKeys.add(new SavedKey(aerospikeTimeSupplier.get(),10,10));
+        savedKeys.add(new SavedKey(aerospikeTimeSupplier.get(),10,5));
 
+        aerospikeCommands.updateCounts(k,savedKeys,1);
+        Record record = aerospikeCommands.getRecord(k);
+        assertThat(record).isNotNull();
     }
 
 }
