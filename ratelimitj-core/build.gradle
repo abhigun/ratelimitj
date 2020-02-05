@@ -5,12 +5,15 @@ project.ext.release = true
 dependencies {
 
     api(
-            'io.projectreactor:reactor-core:3.2.10.RELEASE',
+            'io.projectreactor:reactor-core:3.3.0.RELEASE',
     )
 
     implementation(
             libraries.slf4j,
-            libraries.findbugs
+    )
+
+    compileOnly(
+            libraries.jsr305,
     )
 
     testImplementation(
