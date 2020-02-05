@@ -36,7 +36,7 @@ public class AerospikeWindowRateLimiterTest {
 
     @AfterEach
     void AfterEach(){
-//        aerospikeConnection.getAerospikeClient().truncate(null,aerospikeConfig.getNamespace(),aerospikeConfig.getSessionSet(),null);
+        aerospikeConnection.getAerospikeClient().truncate(null,aerospikeConfig.getNamespace(),aerospikeConfig.getSessionSet(),null);
     }
 
     @AfterAll

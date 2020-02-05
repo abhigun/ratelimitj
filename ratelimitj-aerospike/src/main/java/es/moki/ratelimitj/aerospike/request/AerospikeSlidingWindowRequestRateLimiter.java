@@ -1,7 +1,6 @@
 package es.moki.ratelimitj.aerospike.request;
 import com.aerospike.client.*;
 import es.moki.ratelimitj.aerospike.AerospikeCommands;
-import es.moki.ratelimitj.aerospike.AerospikeConfig;
 import es.moki.ratelimitj.aerospike.AerospikeConnection;
 import es.moki.ratelimitj.core.limiter.request.DefaultRequestLimitRulesSupplier;
 import es.moki.ratelimitj.core.limiter.request.RequestLimitRule;
@@ -117,7 +116,7 @@ public class AerospikeSlidingWindowRequestRateLimiter implements RequestRateLimi
                 // Delete the outofWindowBins TODO: Can be an Asynchronous deletion
                 aerospikeCommands.deleteBins(k,outOfWindowBins);
                 // Update the window count as to the cleaned up Bins
-                cur = aerospikeCommands.updateWindowCount(savedKey,k, decr);
+                cur = aerospikeCommands.updateAndGet(savedKey,k, decr);
             } else {
                 if(record != null)
                     cur = record.getLong(savedKey.countKey);

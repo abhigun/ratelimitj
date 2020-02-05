@@ -72,9 +72,9 @@ public class AerospikeCommands {
         }
     }
 
-    public long updateWindowCount(SavedKey savedKey,Key k, long decrement){
-        Bin countBin = bin(savedKey.countKey, -decrement);
-        return getClient().operate(getClientPolicy().writePolicyDefault,k, Operation.add(countBin),Operation.get(savedKey.countKey)).getLong(savedKey.countKey);
+    public long updateAndGet(String binName, Key k, long decrement){
+        Bin countBin = bin(binName, -decrement);
+        return getClient().operate(getClientPolicy().writePolicyDefault,k, Operation.add(countBin),Operation.get(binName)).getLong(binName);
     }
 
     /**

@@ -57,7 +57,7 @@ public class AerospikeConnection {
             clientPolicy.password = aerospikeConfig.getPassword();
         }
 
-        aerospikeClient = new AerospikeClient(clientPolicy,hosts.toArray(new Host[hosts.size()]));
+        aerospikeClient = new AerospikeClient(clientPolicy,hosts.toArray(new Host[0]));
     }
 
     public AerospikeClient getAerospikeClient() {
