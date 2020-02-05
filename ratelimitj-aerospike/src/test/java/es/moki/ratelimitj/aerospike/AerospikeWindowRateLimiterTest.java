@@ -1,6 +1,5 @@
 package es.moki.ratelimitj.aerospike;
 
-import com.aerospike.client.AerospikeClient;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import es.moki.ratelimitj.aerospike.request.AerospikeSlidingWindowRequestRateLimiter;

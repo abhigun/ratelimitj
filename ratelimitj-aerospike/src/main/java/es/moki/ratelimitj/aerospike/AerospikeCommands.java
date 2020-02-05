@@ -39,6 +39,9 @@ public class AerospikeCommands {
         return getClient().exists(getClientPolicy().readPolicyDefault,k);
     }
 
+    public void save(Key k , Bin... bins){
+        getClient().put(getClientPolicy().writePolicyDefault,k,bins);
+    }
     public void changeExpiry(Key k, int longestDuration){
         if(getClient().exists(getClientPolicy().readPolicyDefault,k)){
             WritePolicy writePolicy = new WritePolicy(getClientPolicy().writePolicyDefault);
@@ -72,9 +75,9 @@ public class AerospikeCommands {
         }
     }
 
-    public long updateAndGet(String binName, Key k, long decrement){
-        Bin countBin = bin(binName, -decrement);
-        return getClient().operate(getClientPolicy().writePolicyDefault,k, Operation.add(countBin),Operation.get(binName)).getLong(binName);
+    public long updateAndGet(String binName, Key k, long delta){
+        Bin countBin = bin(binName, delta);
+        return (long) getClient().operate(getClientPolicy().writePolicyDefault,k, Operation.add(countBin),Operation.get(binName)).getValue(binName);
     }
 
     /**

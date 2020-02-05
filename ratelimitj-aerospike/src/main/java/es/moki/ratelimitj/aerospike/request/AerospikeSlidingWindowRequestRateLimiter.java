@@ -116,7 +116,7 @@ public class AerospikeSlidingWindowRequestRateLimiter implements RequestRateLimi
                 // Delete the outofWindowBins TODO: Can be an Asynchronous deletion
                 aerospikeCommands.deleteBins(k,outOfWindowBins);
                 // Update the window count as to the cleaned up Bins
-                cur = aerospikeCommands.updateAndGet(savedKey,k, decr);
+                cur = aerospikeCommands.updateAndGet(savedKey.countKey,k, -decr);
             } else {
                 if(record != null)
                     cur = record.getLong(savedKey.countKey);
