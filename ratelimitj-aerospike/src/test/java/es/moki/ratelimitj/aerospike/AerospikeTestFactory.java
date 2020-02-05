@@ -13,8 +13,8 @@ public class AerospikeTestFactory {
         this.aerospikeConnection = new AerospikeConnection(aerospikeConfig);
     }
 
-    public AerospikeClient getClient(){
-        return aerospikeConnection.getAerospikeClient();
+    public AerospikeConnection getConnection(){
+        return aerospikeConnection;
     }
 
     public AerospikeConfig getConfig(){

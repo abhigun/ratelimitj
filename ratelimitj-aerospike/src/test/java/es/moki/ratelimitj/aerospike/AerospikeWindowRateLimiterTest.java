@@ -22,26 +22,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
 public class AerospikeWindowRateLimiterTest {
 
-    private static AerospikeClient aerospikeClient;
+    private static AerospikeConnection aerospikeConnection;
     private static AerospikeConfig aerospikeConfig;
     private static ASTimeBanditSupplier timeBandit;
 
     @BeforeAll
     static void BeforeAll(){
         AerospikeTestFactory aerospikeTestFactory = new AerospikeTestFactory();
-        aerospikeClient = aerospikeTestFactory.getClient();
+        aerospikeConnection = aerospikeTestFactory.getConnection();
         aerospikeConfig = aerospikeTestFactory.getConfig();
         timeBandit = new ASTimeBanditSupplier();
     }
 
     @AfterEach
     void AfterEach(){
-        aerospikeClient.truncate(null,aerospikeConfig.getNamespace(),aerospikeConfig.getSessionSet(),null);
+//        aerospikeConnection.getAerospikeClient().truncate(null,aerospikeConfig.getNamespace(),aerospikeConfig.getSessionSet(),null);
     }
 
     @AfterAll
     static void AfterAll(){
-        aerospikeClient.close();
+        aerospikeConnection.stop();
     }
 
     @Test
@@ -89,11 +89,11 @@ public class AerospikeWindowRateLimiterTest {
     @Test
     void shouldLimitSingleWindowSyncWithMultipleKeys() {
 
-        ImmutableSet<RequestLimitRule> rules = ImmutableSet.of(RequestLimitRule.of(Duration.ofSeconds(10), 5));
+        ImmutableSet<RequestLimitRule> rules = ImmutableSet.of(RequestLimitRule.of(Duration.ofSeconds(100), 5));
         RequestRateLimiter requestRateLimiter = getRateLimiter(rules);
 
         IntStream.rangeClosed(1, 5).forEach(value -> {
-            timeBandit.addUnixSeconds(1);
+            timeBandit.addUnixSeconds(10);
             IntStream.rangeClosed(1, 10).forEach(
                     keySuffix -> assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.0." + keySuffix)).isFalse());
         });
@@ -101,7 +101,7 @@ public class AerospikeWindowRateLimiterTest {
         IntStream.rangeClosed(1, 10).forEach(
                 keySuffix -> assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.0." + keySuffix)).isTrue());
 
-        timeBandit.addUnixSeconds(5);
+        timeBandit.addUnixSeconds(50);
         IntStream.rangeClosed(1, 10).forEach(
                 keySuffix -> assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.0.0." + keySuffix)).isFalse());
     }
@@ -109,13 +109,13 @@ public class AerospikeWindowRateLimiterTest {
     @Test
     void shouldLimitSingleWindowSyncWithKeySpecificRules() {
 
-        RequestLimitRule rule1 = RequestLimitRule.of(Duration.ofSeconds(10), 5).matchingKeys("ip:127.9.0.0");
-        RequestLimitRule rule2 = RequestLimitRule.of(Duration.ofSeconds(10), 10);
+        RequestLimitRule rule1 = RequestLimitRule.of(Duration.ofSeconds(100), 5).matchingKeys("ip:127.9.0.0");
+        RequestLimitRule rule2 = RequestLimitRule.of(Duration.ofSeconds(100), 10);
 
         RequestRateLimiter requestRateLimiter = getRateLimiter(ImmutableSet.of(rule1, rule2));
 
         IntStream.rangeClosed(1, 5).forEach(value -> {
-            timeBandit.addUnixSeconds(1);
+            timeBandit.addUnixSeconds(10);
             assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.9.0.0")).isFalse();
         });
         assertThat(requestRateLimiter.overLimitWhenIncremented("ip:127.9.0.0")).isTrue();
@@ -191,6 +191,6 @@ public class AerospikeWindowRateLimiterTest {
 
 
     private RequestRateLimiter getRateLimiter(Set<RequestLimitRule> rules) {
-        return new AerospikeSlidingWindowRequestRateLimiter(aerospikeClient,rules,timeBandit, aerospikeConfig);
+        return new AerospikeSlidingWindowRequestRateLimiter(aerospikeConnection,rules,timeBandit);
     }
 }

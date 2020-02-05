@@ -39,7 +39,6 @@ public class AerospikeConnection {
         readPolicy.sendKey = true;
 
         WritePolicy writePolicy = new WritePolicy();
-        writePolicy.recordExistsAction = RecordExistsAction.REPLACE;
         writePolicy.maxRetries = aerospikeConfig.getRetries();
         writePolicy.consistencyLevel = ConsistencyLevel.CONSISTENCY_ALL;
         writePolicy.sleepBetweenRetries = aerospikeConfig.getSleepBetweenRetries();
@@ -69,5 +68,14 @@ public class AerospikeConnection {
     public ClientPolicy getClientPolicy() {
         requireNonNull(clientPolicy, "ClientPolicy can not be null,Call Initiialize() to set the connection");
         return clientPolicy;
+    }
+
+    public AerospikeConfig getConfig(){
+        return aerospikeConfig;
+    }
+
+    public void stop(){
+        requireNonNull(aerospikeClient, "Aerospike Client can not be null, Call Initiialize() to set the connection");
+        aerospikeClient.close();
     }
 }
